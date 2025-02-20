@@ -1,0 +1,62 @@
+name: cipher_solver
+description: A Flutter application for solving and creating ciphers
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  flutter_services_binding: ^0.1.0
+  pdf: ^3.10.4
+  printing: ^5.10.4
+  google_fonts: ^5.1.0
+
+  # Add these for the cipher application
+  path_provider: ^2.0.15
+  image: ^4.0.17
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.8
+  flutter_gen_runner: ^5.4.0
+
+flutter:
+  uses-material-design: true
+  
+  # Uncomment and modify this section when you add cipher images
+  assets:
+    - assets/
+    - assets/runes/a/
+    - assets/runes/b/
+    - assets/runes/c/
+    - assets/runes/d/
+    - assets/runes/e/
+    - assets/runes/f/
+    - assets/runes/g/
+    - assets/runes/h/
+    - assets/runes/i/
+    - assets/runes/j/
+    - assets/runes/k/
+    - assets/runes/l/
+    - assets/runes/m/
+    - assets/runes/n/
+    - assets/runes/o/
+    - assets/runes/p/
+    - assets/runes/q/
+    - assets/runes/r/
+    - assets/runes/s/
+    - assets/runes/t/
+    - assets/runes/u/
+    - assets/runes/v/
+    - assets/runes/w/
+    - assets/runes/x/
+    - assets/runes/y/
+    - assets/runes/z/
+    - "assets/themes/Math Night.txt"
+    - assets/key/runes_key.png
