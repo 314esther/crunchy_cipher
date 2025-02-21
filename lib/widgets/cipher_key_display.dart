@@ -120,6 +120,7 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
     
     // Calculate maximum position to keep key on screen
     final maxWidth = screenWidth - (isSmallScreen ? 150 : 200);
+    // Leave space for keyboard if it's visible
     final maxHeight = screenHeight - keyboardHeight - (isSmallScreen ? 100 : 150);
     _position = Offset(
       _position.dx.clamp(0, maxWidth),
@@ -131,17 +132,7 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
       builder: (context, child) {
         return Stack(
           children: [
-            // Semi-transparent overlay to allow touches outside the key
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: widget.onClose,
-                child: Container(
-                  color: Colors.transparent,
-                ),
-              ),
-            ),
-            
-            // Draggable key display
+            // Positioned draggable key display
             Positioned(
               left: _position.dx,
               top: _position.dy,
