@@ -590,6 +590,22 @@ class _CipherSolverPageState extends State<CipherSolverPage> {
     );
   }
 
+  // Add new method to clear all input fields
+  void _clearInputs() {
+    setState(() {
+      // Clear all text controllers
+      for (var controller in solutionControllers.values) {
+        controller.clear();
+      }
+      
+      // Reset score display
+      showScore = false;
+      scorePercentage = 0.0;
+      correctLetters = 0;
+      totalLetters = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -618,46 +634,42 @@ class _CipherSolverPageState extends State<CipherSolverPage> {
         onKeyVisibilityToggled: _toggleKeyVisibility,
         onPrintCipher: _generateAndDownloadPdf,
       ),
-      // Use Stack as the root widget to properly layer the UI elements
       body: Stack(
         children: [
-          // Main content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Current text display
-                /*Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    'Current Text: $originalText',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                ),*/
-                
-                // Feature indicators row
                 _buildFeatureIndicators(),
                 
-                // Responsive cipher layout
                 Expanded(
                   child: _buildResponsiveCipherLayout(),
                 ),
                 
                 const SizedBox(height: 16),
                 
-                // Check Answer button
-                ElevatedButton.icon(
-                  onPressed: _checkAnswer,
-                  icon: const Icon(Icons.check_circle_outline),
-                  label: const Text('Check Answer'),
+                // Updated button row with Clear and Check Answer buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _clearInputs,
+                      icon: const Icon(Icons.clear),
+                      label: const Text('Clear'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: _checkAnswer,
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('Check Answer'),
+                    ),
+                  ],
                 ),
                 
-                // Score display
                 if (showScore) ...[
                   const SizedBox(height: 16),
                   Text(
@@ -692,7 +704,6 @@ class _CipherSolverPageState extends State<CipherSolverPage> {
             ),
           ),
           
-          // Key overlay - positioned properly in the stack
           if (_keyVisible)
             Positioned.fill(
               child: CipherKeyDisplay(
