@@ -9,6 +9,7 @@ class CipherDrawer extends StatefulWidget {
   final void Function(String?) onEncodingChanged;
   final VoidCallback onCreateCipher;
   final void Function(String) onThemeTextSelected;
+  final void Function(String, int) onSpecificPuzzleSelected; // New callback for puzzle selection
   final bool autoSubstitutionEnabled;
   final void Function(bool) onAutoSubstitutionToggled;
   final bool keyAvailable;
@@ -23,6 +24,7 @@ class CipherDrawer extends StatefulWidget {
     required this.onEncodingChanged,
     required this.onCreateCipher,
     required this.onThemeTextSelected,
+    required this.onSpecificPuzzleSelected, // Added new parameter
     required this.autoSubstitutionEnabled,
     required this.onAutoSubstitutionToggled,
     required this.keyAvailable,
@@ -38,7 +40,9 @@ class CipherDrawer extends StatefulWidget {
 class _CipherDrawerState extends State<CipherDrawer> {
   List<String> availableThemes = [];
   String? selectedTheme;
-
+  int selectedPuzzleNumber = 0; // Default puzzle number
+  Map<String, int> themePuzzleCounts = {}; // Stores number of puzzles per theme
+  
   @override
   void initState() {
     super.initState();
@@ -64,10 +68,42 @@ class _CipherDrawerState extends State<CipherDrawer> {
       setState(() {
         availableThemes = themes.toList()..sort();
         // Set first theme as default if available
-        selectedTheme = availableThemes.isNotEmpty ? availableThemes.first : null;
+        if (availableThemes.isNotEmpty) {
+          selectedTheme = availableThemes.first;
+          _loadPuzzleCountForTheme(selectedTheme!);
+        }
       });
     } catch (e) {
       debugPrint('Error loading themes: $e');
+    }
+  }
+
+  // Load puzzle count for the selected theme
+  Future<void> _loadPuzzleCountForTheme(String theme) async {
+    try {
+      if (themePuzzleCounts.containsKey(theme)) {
+        // Already loaded, set selected puzzle to first one
+        setState(() {
+          selectedPuzzleNumber = 0;
+        });
+        return;
+      }
+      
+      final String themeContent = await rootBundle.loadString('assets/themes/$theme.txt');
+      final List<String> textBlocks = themeContent.split('\n')
+          .where((block) => block.trim().isNotEmpty)
+          .toList();
+      
+      setState(() {
+        themePuzzleCounts[theme] = textBlocks.length;
+        selectedPuzzleNumber = 0; // Reset to first puzzle when theme changes
+      });
+    } catch (e) {
+      debugPrint('Error counting puzzles in theme: $e');
+      setState(() {
+        themePuzzleCounts[theme] = 0;
+        selectedPuzzleNumber = 0;
+      });
     }
   }
 
@@ -103,8 +139,48 @@ class _CipherDrawerState extends State<CipherDrawer> {
     }
   }
 
+  // Load specific puzzle by index
+  Future<void> _selectSpecificPuzzle() async {
+    if (selectedTheme == null) return;
+
+    try {
+      // Load the content of the selected theme file
+      final String themeContent = await rootBundle.loadString('assets/themes/$selectedTheme.txt');
+      
+      // Split the content into text blocks
+      final List<String> textBlocks = themeContent.split('\n');
+      
+      // Remove any empty blocks
+      textBlocks.removeWhere((block) => block.trim().isEmpty);
+      
+      if (textBlocks.isNotEmpty && selectedPuzzleNumber < textBlocks.length) {
+        // Get the selected puzzle
+        final String selectedText = textBlocks[selectedPuzzleNumber];
+        
+        // Call the callback to set the selected text with the puzzle number
+        widget.onSpecificPuzzleSelected(selectedText, selectedPuzzleNumber);
+        
+        // Close the drawer
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid puzzle number: $selectedPuzzleNumber')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error selecting specific puzzle: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load puzzle from $selectedTheme')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Calculate puzzle numbers based on loaded theme
+    final int puzzleCount = themePuzzleCounts[selectedTheme] ?? 0;
+    final List<int> puzzleNumbers = List.generate(puzzleCount, (index) => index);
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -253,6 +329,8 @@ class _CipherDrawerState extends State<CipherDrawer> {
                   ),
                 ),
                 const SizedBox(height: 8),
+                
+                // Theme dropdown
                 DropdownButtonFormField<String>(
                   value: selectedTheme,
                   decoration: const InputDecoration(
@@ -268,13 +346,63 @@ class _CipherDrawerState extends State<CipherDrawer> {
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedTheme = newValue;
+                      if (newValue != null) {
+                        _loadPuzzleCountForTheme(newValue);
+                      }
                     });
                   },
                 ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: _selectRandomTextFromTheme,
-                  child: const Text('Give me a Cipher!'),
+                
+                const SizedBox(height: 12),
+                
+                // New puzzle selection dropdown
+                DropdownButtonFormField<int>(
+                  value: puzzleNumbers.contains(selectedPuzzleNumber) ? selectedPuzzleNumber : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Puzzle Number',
+                    border: OutlineInputBorder(),
+                    hintText: 'Select a specific puzzle',
+                  ),
+                  items: puzzleNumbers.map((int index) {
+                    return DropdownMenuItem<int>(
+                      value: index,
+                      child: Text('Puzzle ${index + 1}'),
+                    );
+                  }).toList(),
+                  onChanged: puzzleNumbers.isEmpty 
+                      ? null 
+                      : (int? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              selectedPuzzleNumber = newValue;
+                            });
+                          }
+                        },
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Row of buttons for random vs specific puzzle
+                Row(
+                  children: [
+                    // Load specific puzzle button
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.filter_1),
+                        label: const Text('Load Selected'),
+                        onPressed: puzzleNumbers.isEmpty ? null : _selectSpecificPuzzle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Random puzzle button
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.shuffle),
+                        label: const Text('Random'),
+                        onPressed: _selectRandomTextFromTheme,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

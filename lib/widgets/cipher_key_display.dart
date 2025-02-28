@@ -120,7 +120,6 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
     
     // Calculate maximum position to keep key on screen
     final maxWidth = screenWidth - (isSmallScreen ? 150 : 200);
-    // Leave space for keyboard if it's visible
     final maxHeight = screenHeight - keyboardHeight - (isSmallScreen ? 100 : 150);
     _position = Offset(
       _position.dx.clamp(0, maxWidth),
@@ -132,7 +131,17 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
       builder: (context, child) {
         return Stack(
           children: [
-            // Positioned draggable key display
+            // Semi-transparent overlay to allow touches outside the key
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: widget.onClose,
+                child: Container(
+                  color: Colors.transparent,
+                ),
+              ),
+            ),
+            
+            // Draggable key display
             Positioned(
               left: _position.dx,
               top: _position.dy,
@@ -157,73 +166,62 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
                         ),
                       ],
                     ),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Header with minimize/close buttons
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              borderRadius: BorderRadius.vertical(
-                                top: const Radius.circular(12),
-                                bottom: _isMinimized ? const Radius.circular(12) : Radius.zero,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Header with minimize/close buttons
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                icon: Icon(_isMinimized ? Icons.expand_more : Icons.expand_less),
+                                onPressed: () {
+                                  setState(() {
+                                    _isMinimized = !_isMinimized;
+                                  });
+                                },
+                                iconSize: 20,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 30,
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                IconButton(
-                                  icon: Icon(_isMinimized ? Icons.expand_more : Icons.expand_less),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isMinimized = !_isMinimized;
-                                    });
-                                  },
-                                  iconSize: 20,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 30,
-                                    minHeight: 30,
-                                  ),
+                              const Text(
+                                'Key',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: widget.onClose,
+                                iconSize: 20,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 30,
                                 ),
-                                Text(
-                                  'Cipher Key',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: isSmallScreen ? 12 : 14,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.close),
-                                  onPressed: widget.onClose,
-                                  iconSize: 20,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 30,
-                                    minHeight: 30,
-                                  ),
-                                ),
-                              ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Key content
+                        if (!_isMinimized)
+                          Flexible(
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: _buildKeyContent(context, isSmallScreen),
+                              ),
                             ),
                           ),
-                          
-                          // Key content
-                          if (!_isMinimized) ...[
-                            const Divider(height: 1),
-                            Flexible(
-                              child: SingleChildScrollView(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: _buildKeyContent(context, isSmallScreen),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                      ],
                     ),
                   ),
                 ),

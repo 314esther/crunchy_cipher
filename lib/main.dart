@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'cipher_solver_page.dart';
+import 'splash_page.dart';
 
 void main() {
   runApp(const CipherApp());
@@ -16,7 +16,7 @@ class CipherApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const CipherSolverPage(),
+      home: const SplashPage(),
     );
   }
 }
