@@ -399,6 +399,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                /*
                 // Current text display
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
@@ -411,7 +412,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                   ),
-                ),
+                ),*/
                 
                 // Feature indicators row
                 _buildFeatureIndicators(),
