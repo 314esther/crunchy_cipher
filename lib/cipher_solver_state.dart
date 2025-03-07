@@ -53,8 +53,8 @@ mixin CipherSolverStateBase<T extends StatefulWidget> on State<T> {
   int totalLetters = 0;
   bool showScore = false;
   
-  // Auto-substitution feature
-  bool autoSubstitutionEnabled = false;
+  // Auto-substitution feature - changed to true to enable by default
+  bool autoSubstitutionEnabled = true;
   
   // Key display feature
   bool keyAvailable = false;

@@ -7,6 +7,11 @@ version: 1.0.0+1
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
+fonts:
+  - family: MarkerFont
+    fonts:
+      - asset: assets/fonts/PermanentMarker-Regular.ttf
+
 dependencies:
   flutter:
     sdk: flutter
@@ -15,6 +20,9 @@ dependencies:
   pdf: ^3.10.4
   printing: ^5.10.4
   google_fonts: ^5.1.0
+  #wheel_chooser: ^1.1.2 
+  selector_wheel: ^1.1.2
+  shared_preferences: ^2.2.0
 
   # Add these for the cipher application
   path_provider: ^2.0.15
@@ -32,31 +40,31 @@ flutter:
   # Uncomment and modify this section when you add cipher images
   assets:
     - assets/
-    - assets/runes/a/
-    - assets/runes/b/
-    - assets/runes/c/
-    - assets/runes/d/
-    - assets/runes/e/
-    - assets/runes/f/
-    - assets/runes/g/
-    - assets/runes/h/
-    - assets/runes/i/
-    - assets/runes/j/
-    - assets/runes/k/
-    - assets/runes/l/
-    - assets/runes/m/
-    - assets/runes/n/
-    - assets/runes/o/
-    - assets/runes/p/
-    - assets/runes/q/
-    - assets/runes/r/
-    - assets/runes/s/
-    - assets/runes/t/
-    - assets/runes/u/
-    - assets/runes/v/
-    - assets/runes/w/
-    - assets/runes/x/
-    - assets/runes/y/
-    - assets/runes/z/
+    - assets/Runes/a/
+    - assets/Runes/b/
+    - assets/Runes/c/
+    - assets/Runes/d/
+    - assets/Runes/e/
+    - assets/Runes/f/
+    - assets/Runes/g/
+    - assets/Runes/h/
+    - assets/Runes/i/
+    - assets/Runes/j/
+    - assets/Runes/k/
+    - assets/Runes/l/
+    - assets/Runes/m/
+    - assets/Runes/n/
+    - assets/Runes/o/
+    - assets/Runes/p/
+    - assets/Runes/q/
+    - assets/Runes/r/
+    - assets/Runes/s/
+    - assets/Runes/t/
+    - assets/Runes/u/
+    - assets/Runes/v/
+    - assets/Runes/w/
+    - assets/Runes/x/
+    - assets/Runes/y/
+    - assets/Runes/z/
     - "assets/themes/Math Night.txt"
-    - assets/key/runes_key.png
+    - assets/key/Runes_key.png

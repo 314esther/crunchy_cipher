@@ -118,9 +118,13 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isSmallScreen = screenWidth < 600;
     
+    // Increased size parameters - use doubles to avoid type errors
+    final double keyWidth = isSmallScreen ? 220.0 : 300.0;
+    final double keyHeight = isSmallScreen ? 300.0 : 400.0;
+    
     // Calculate maximum position to keep key on screen
-    final maxWidth = screenWidth - (isSmallScreen ? 150 : 200);
-    final maxHeight = screenHeight - keyboardHeight - (isSmallScreen ? 100 : 150);
+    final maxWidth = screenWidth - keyWidth;
+    final maxHeight = screenHeight - keyboardHeight - (keyHeight / 2);
     _position = Offset(
       _position.dx.clamp(0, maxWidth),
       _position.dy.clamp(0, maxHeight),
@@ -133,10 +137,14 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
           children: [
             // Semi-transparent overlay to allow touches outside the key
             Positioned.fill(
-              child: GestureDetector(
-                onTap: widget.onClose,
-                child: Container(
-                  color: Colors.transparent,
+              child: IgnorePointer(
+                // This allows touches to pass through to widgets beneath
+                ignoring: true,
+                child: GestureDetector(
+                  onTap: widget.onClose,
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
                 ),
               ),
             ),
@@ -152,8 +160,8 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
                   opacity: _isDragging ? 0.7 : 1.0,
                   child: Container(
                     constraints: BoxConstraints(
-                      maxWidth: isSmallScreen ? 150 : 200,
-                      maxHeight: isSmallScreen ? 200 : 300,
+                      maxWidth: keyWidth,
+                      maxHeight: keyHeight,
                     ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
@@ -216,7 +224,7 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
                           Flexible(
                             child: SingleChildScrollView(
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: _buildKeyContent(context, isSmallScreen),
                               ),
                             ),
@@ -239,13 +247,13 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
       final alphabet = List.generate(26, (index) => String.fromCharCode(65 + index));
       
       return Wrap(
-        spacing: isSmallScreen ? 4 : 6,
-        runSpacing: isSmallScreen ? 4 : 6,
+        spacing: isSmallScreen ? 6 : 8,
+        runSpacing: isSmallScreen ? 6 : 8,
         children: alphabet.map((letter) {
           final substitution = widget.substitutionMap[letter] ?? '?';
           return Container(
-            width: isSmallScreen ? 32 : 40,
-            height: isSmallScreen ? 24 : 30,
+            width: isSmallScreen ? 45.0 : 55.0,
+            height: isSmallScreen ? 30.0 : 36.0,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey[300]!),
               borderRadius: BorderRadius.circular(4),
@@ -257,18 +265,18 @@ class _CipherKeyDisplayState extends State<CipherKeyDisplay> with SingleTickerPr
                   letter,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: isSmallScreen ? 12 : 14,
+                    fontSize: isSmallScreen ? 14 : 16,
                   ),
                 ),
                 Icon(
                   Icons.arrow_forward,
-                  size: isSmallScreen ? 10 : 12,
+                  size: isSmallScreen ? 12 : 14,
                   color: Colors.grey[600],
                 ),
                 Text(
                   substitution,
                   style: TextStyle(
-                    fontSize: isSmallScreen ? 12 : 14,
+                    fontSize: isSmallScreen ? 14 : 16,
                     color: Colors.blue[700],
                   ),
                 ),
