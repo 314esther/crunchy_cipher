@@ -14,7 +14,7 @@ mixin CipherSolverStateBase<T extends StatefulWidget> on State<T> {
   List<String> availableEncodings = [];
   
   // Default text 
-  String originalText = "CRANKIN' CRUNCHY CIPHERS CRISS-CROSSES YOUR CRANIUM!";
+  String originalText = "CRANKIN' CRUNCHY CIPHERS CRISS CROSSES YOUR CRANIUM!";
   String? selectedEncoding;
   
   // Fixed substitution map for the default puzzle (generated from the deterministic algorithm)
