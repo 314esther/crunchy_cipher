@@ -5349,6 +5349,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
 convert
 crypto
+source_gen
 vm_service
 
 Copyright 2015, the Dart project authors.
@@ -8953,6 +8954,31 @@ modification, are permitted.
 There's ABSOLUTELY NO WARRANTY, express or implied.
 
 (This is a heavily cut-down "BSD license".)
+--------------------------------------------------------------------------------
+freezed
+freezed_annotation
+
+MIT License
+
+Copyright (c) 2020 Remi Rousselet
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 --------------------------------------------------------------------------------
 frontend_server_client
 
@@ -32597,6 +32623,13 @@ path_provider_linux
 path_provider_platform_interface
 path_provider_windows
 plugin_platform_interface
+shared_preferences
+shared_preferences_android
+shared_preferences_foundation
+shared_preferences_linux
+shared_preferences_platform_interface
+shared_preferences_web
+shared_preferences_windows
 vector_graphics_codec
 vector_graphics_compiler
 xdg_directories
@@ -33282,6 +33315,31 @@ rapidjson
 The above software in this distribution may have been modified by
 THL A29 Limited ("Tencent Modifications").
 All Tencent Modifications are Copyright (C) 2015 THL A29 Limited.
+--------------------------------------------------------------------------------
+selector_wheel
+
+MIT License
+
+Copyright (c) 2023 Aleksandre Lomia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 --------------------------------------------------------------------------------
 skia
 
