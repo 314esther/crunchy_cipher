@@ -643,8 +643,8 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
         // Calculate adaptive box size based on available width
         final maxWidth = constraints.maxWidth;
         // Increase base size while maintaining overflow prevention
-        final double baseSize = min(maxWidth / 18, 75.0); // Larger base size (was /24, 60.0)
-        final double boxSize = max(baseSize, 30.0); // Larger minimum size (was 24.0)
+        final double baseSize = min(maxWidth / 18, 150.0); // Larger base size (was /24, 60.0)
+        final double boxSize = max(baseSize, 65.0); // Larger minimum size (was 24.0)
         final double spacing = min(6.0, boxSize / 8); // Slightly larger spacing
         final double effectiveBoxWidth = boxSize * 0.8; // Wider effective width (was 0.7)
         
