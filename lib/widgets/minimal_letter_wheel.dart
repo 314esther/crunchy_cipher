@@ -1,5 +1,4 @@
 // Minimal Letter Wheel with forced UI refresh
-// Add this to a new file or directly in cipher_solver_page.dart
 
 import 'package:flutter/material.dart';
 
@@ -21,16 +20,17 @@ class SimpleLetterWheel extends StatefulWidget {
 
 class _SimpleLetterWheelState extends State<SimpleLetterWheel> {
   late FixedExtentScrollController _controller;
-  final List<String> alphabet = List.generate(
-    26, (index) => String.fromCharCode(65 + index)
-  );
+  late List<String> alphabet;
 
   @override
   void initState() {
     super.initState();
-    // Set initial position based on provided value or default to 'A'
+    // Create alphabet list with blank character at the beginning
+    alphabet = [''] + List.generate(26, (index) => String.fromCharCode(65 + index));
+    
+    // Set initial position based on provided value or default to blank
     String initialLetter = widget.initialValue?.toUpperCase() ?? '';
-    int initialIndex = 0; // Default to 'A'
+    int initialIndex = 0; // Default to blank
     
     if (initialLetter.isNotEmpty) {
       int foundIndex = alphabet.indexOf(initialLetter);
