@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
 import 'cipher_solver_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -88,9 +90,118 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   }
   
   void _navigateToCipherPage() {
+    // Show theme selection dialog
+    _showThemeSelectionDialog();
+  }
+  
+  // Load theme names from the assets directory
+  Future<List<String>> _loadThemeNames() async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    
+    final List<String> themeNames = [];
+    
+    // Filter for .txt files in the themes directory
+    for (String key in manifestMap.keys) {
+      if (key.startsWith('assets/themes/') && key.endsWith('.txt')) {
+        // Extract the filename without extension
+        final filename = key.split('/').last.replaceAll('.txt', '');
+        themeNames.add(filename);
+      }
+    }
+    
+    // Sort the theme names alphabetically
+    themeNames.sort();
+    return themeNames;
+  }
+  
+  void _showThemeSelectionDialog() async {
+    // Load available themes
+    final List<String> themeNames = await _loadThemeNames();
+    
+    if (themeNames.isEmpty) {
+      // If no themes are found, show an error and use a default
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No theme files found. Using default theme.')),
+      );
+      
+      _navigateWithTheme('Default');
+      return;
+    }
+    
+    // Show the dialog with available themes
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User must pick a theme
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.category, color: Colors.indigo.shade600),
+              const SizedBox(width: 10),
+              const Text('Choose a Theme'),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: themeNames.length,
+              itemBuilder: (context, index) {
+                final theme = themeNames[index];
+                // Select an appropriate icon based on theme name
+                IconData themeIcon = _getThemeIcon(theme);
+                
+                return ListTile(
+                  leading: Icon(themeIcon, color: Colors.indigo),
+                  title: Text(theme),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _navigateWithTheme(theme);
+                  },
+                );
+              },
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        );
+      },
+    );
+  }
+  
+  // Helper method to get an appropriate icon for each theme
+  IconData _getThemeIcon(String theme) {
+    final lowercaseTheme = theme.toLowerCase();
+    
+    if (lowercaseTheme.contains('animal')) return Icons.pets;
+    if (lowercaseTheme.contains('space') || 
+        lowercaseTheme.contains('planet') || 
+        lowercaseTheme.contains('star')) return Icons.rocket;
+    if (lowercaseTheme.contains('sport') || 
+        lowercaseTheme.contains('game')) return Icons.sports_soccer;
+    if (lowercaseTheme.contains('food') || 
+        lowercaseTheme.contains('fruit') || 
+        lowercaseTheme.contains('meal')) return Icons.restaurant;
+    if (lowercaseTheme.contains('history') || 
+        lowercaseTheme.contains('ancient')) return Icons.history_edu;
+    if (lowercaseTheme.contains('science') || 
+        lowercaseTheme.contains('tech')) return Icons.science;
+    if (lowercaseTheme.contains('music') || 
+        lowercaseTheme.contains('song')) return Icons.music_note;
+    
+    // Default icon
+    return Icons.category;
+  }
+  
+  void _navigateWithTheme(String theme) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const CipherSolverPage(showInstructions: true),
+        builder: (context) => CipherSolverPage(
+          showInstructions: true,
+          selectedTheme: theme,
+        ),
       ),
     );
   }
@@ -167,7 +278,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 64),
                   
-                  // Changed button text from "Get a Cipher" to "Play"
+                  // Button to play
                   ElevatedButton.icon(
                     onPressed: _navigateToCipherPage,
                     icon: const Icon(Icons.play_arrow_rounded),
@@ -206,40 +317,5 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         ),
       ),
     );
-  }
-  
-  // Helper method to check if the message is properly encrypted
-  // Only for debugging - can be removed in production
-  void _verifyEncryption() {
-    final String originalText = _splashText;
-    final String encryptedText = _cipheredCharacters.join('');
-    
-    print('Original: $originalText');
-    print('Encrypted: $encryptedText');
-    
-    // Check for consistent substitution
-    final Map<String, String> reverseMap = {};
-    bool isConsistent = true;
-    
-    for (int i = 0; i < originalText.length; i++) {
-      final originalChar = originalText[i];
-      final encryptedChar = encryptedText[i];
-      
-      if (RegExp(r'[A-Z]').hasMatch(originalChar)) {
-        if (reverseMap.containsKey(originalChar)) {
-          if (reverseMap[originalChar] != encryptedChar) {
-            isConsistent = false;
-            print('Inconsistency found: $originalChar maps to both ${reverseMap[originalChar]} and $encryptedChar');
-          }
-        } else {
-          reverseMap[originalChar] = encryptedChar;
-        }
-      } else if (originalChar != encryptedChar) {
-        isConsistent = false;
-        print('Punctuation mismatch: $originalChar became $encryptedChar');
-      }
-    }
-    
-    print('Encryption is ${isConsistent ? 'consistent' : 'inconsistent'}');
   }
 }
