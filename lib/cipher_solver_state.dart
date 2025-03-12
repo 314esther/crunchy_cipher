@@ -13,39 +13,9 @@ mixin CipherSolverStateBase<T extends StatefulWidget> on State<T> {
   List<String> cipheredCharacters = [];
   List<String> availableEncodings = [];
   
-  // Default text 
-  String originalText = "CRANKIN' CRUNCHY CIPHERS CRISS CROSSES YOUR CRANIUM!";
+  // Default text - now empty, will be set by theme selection
+  String originalText = "";
   String? selectedEncoding;
-  
-  // Fixed substitution map for the default puzzle (generated from the deterministic algorithm)
-  final Map<String, String> _fixedSubstitutionMap = {
-    'A': 'J',
-    'B': 'V',
-    'C': 'I',
-    'D': 'L',
-    'E': 'W',
-    'F': 'Z',
-    'G': 'S',
-    'H': 'X',
-    'I': 'G',
-    'J': 'Y',
-    'K': 'Q',
-    'L': 'B',
-    'M': 'D',
-    'N': 'F',
-    'O': 'K',
-    'P': 'E',
-    'Q': 'R',
-    'R': 'U',
-    'S': 'M',
-    'T': 'O',
-    'U': 'N',
-    'V': 'H',
-    'W': 'A',
-    'X': 'P',
-    'Y': 'C',
-    'Z': 'T',
-  };
   
   // Scoring variables
   double scorePercentage = 0.0;
@@ -53,7 +23,7 @@ mixin CipherSolverStateBase<T extends StatefulWidget> on State<T> {
   int totalLetters = 0;
   bool showScore = false;
   
-  // Auto-substitution feature - changed to true to enable by default
+  // Auto-substitution feature - enabled by default
   bool autoSubstitutionEnabled = true;
   
   // Key display feature
@@ -66,9 +36,8 @@ mixin CipherSolverStateBase<T extends StatefulWidget> on State<T> {
     super.initState();
     loadAvailableEncodings();
     
-    // Use the fixed substitution map for the default puzzle
-    substitutionMap.addAll(_fixedSubstitutionMap);
-    encipherText();
+    // Note: We don't create a default substitution or encipher text here anymore
+    // That will be handled by CipherSolverPage after loading the theme
     checkKeyAvailability();
   }
 
