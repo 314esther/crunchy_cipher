@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:selector_wheel/selector_wheel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'widgets/cipher_drawer.dart';
 import 'widgets/cipher_key_display.dart';
 import 'widgets/right_drawer.dart';
@@ -13,10 +14,12 @@ import 'dart:async';
 
 class CipherSolverPage extends StatefulWidget {
   final bool showInstructions;
+  final String selectedTheme; // Parameter for selected theme file name
   
   const CipherSolverPage({
     super.key, 
-    this.showInstructions = false
+    this.showInstructions = false,
+    required this.selectedTheme,
   });
 
   @override
@@ -28,9 +31,19 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
   final List<String> _savedPuzzles = [];
   final Map<String, Map<String, dynamic>> _savedPuzzleData = {};
   
+  // Theme puzzle data
+  final List<String> _themePuzzles = [];
+  bool _loadingTheme = true;
+  
   @override
   void initState() {
     super.initState();
+    
+    // Load theme content and set up the initial puzzle
+    _loadThemeContent().then((_) {
+      // Select a random puzzle from the theme
+      _selectRandomPuzzleFromTheme();
+    });
     
     // Show instruction dialog after the page is built
     if (widget.showInstructions) {
@@ -58,6 +71,69 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
     
     // Load saved puzzles from persistent storage
     _loadSavedPuzzles();
+  }
+  
+  // Load theme content from the asset file
+  Future<void> _loadThemeContent() async {
+    try {
+      setState(() {
+        _loadingTheme = true;
+      });
+      
+      // Try to load the theme file
+      String filePath = 'assets/themes/${widget.selectedTheme}.txt';
+      String content = await rootBundle.loadString(filePath);
+      
+      // Split content by newlines and filter out empty lines
+      List<String> puzzles = content.split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList();
+      
+      setState(() {
+        _themePuzzles.clear();
+        _themePuzzles.addAll(puzzles);
+        _loadingTheme = false;
+      });
+      
+      print('Loaded ${_themePuzzles.length} puzzles from theme: ${widget.selectedTheme}');
+    } catch (e) {
+      print('Error loading theme content: $e');
+      
+      // Use a fallback if theme loading fails
+      setState(() {
+        _themePuzzles.clear();
+        _themePuzzles.add('CRYPTOGRAPHY IS THE PRACTICE OF SECURE COMMUNICATION');
+        _loadingTheme = false;
+      });
+      
+      // Show an error snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading theme: ${widget.selectedTheme}. Using default puzzle.')),
+      );
+    }
+  }
+  
+  // Select a random puzzle from the loaded theme
+  void _selectRandomPuzzleFromTheme() {
+    if (_themePuzzles.isEmpty) {
+      // If no puzzles are available, use a default
+      setState(() {
+        originalText = 'CRYPTOGRAPHY IS THE PRACTICE OF SECURE COMMUNICATION';
+      });
+    } else {
+      // Select a random puzzle from the theme
+      final random = Random();
+      final selectedPuzzle = _themePuzzles[random.nextInt(_themePuzzles.length)];
+      
+      setState(() {
+        originalText = selectedPuzzle.toUpperCase(); // Ensure uppercase
+      });
+    }
+    
+    // Create a new random substitution and encipher the text
+    createRandomSubstitution();
+    encipherText();
   }
   
   // Load saved puzzles from SharedPreferences
@@ -438,9 +514,28 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
 
   @override
   Widget build(BuildContext context) {
+    // Show loading indicator while theme is loading
+    if (_loadingTheme) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Crazy Crunchy Ciphers'),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Loading theme...'),
+            ],
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crazy Crunchy Ciphers'),
+        title: Text('Crazy Crunchy Ciphers - ${widget.selectedTheme}'),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -511,21 +606,6 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                /*
-                // Current text display
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    'Current Text: $originalText',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                ),*/
-                
                 // Feature indicators row
                 _buildFeatureIndicators(),
                 
@@ -597,6 +677,16 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
   Widget _buildFeatureIndicators() {
     final List<Widget> indicators = [];
     
+    // Add theme indicator
+    indicators.add(
+      Chip(
+        label: Text('Theme: ${widget.selectedTheme}'),
+        labelStyle: const TextStyle(fontSize: 12, color: Colors.white),
+        backgroundColor: Colors.teal,
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+    
     // Auto-substitution indicator - now works for all encoding types
     if (autoSubstitutionEnabled) {
       indicators.add(
@@ -621,11 +711,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
       );
     }
     
-    // Return row of indicators or empty container if none
-    if (indicators.isEmpty) {
-      return const SizedBox(height: 0);
-    }
-    
+    // Return row of indicators
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Wrap(
@@ -638,18 +724,19 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
   
   // Build responsive cipher layout
   Widget _buildResponsiveCipherLayout() {
+    // Existing implementation
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate adaptive box size based on available width
         final maxWidth = constraints.maxWidth;
         // Increase base size while maintaining overflow prevention
-        final double baseSize = min(maxWidth / 18, 100.0); // Larger base size (was /24, 60.0)
-        final double boxSize = max(baseSize, 45.0); // Larger minimum size (was 24.0)
-        final double spacing = min(6.0, boxSize / 8); // Slightly larger spacing
-        final double effectiveBoxWidth = boxSize * 0.8; // Wider effective width (was 0.7)
+        final double baseSize = min(maxWidth / 18, 75.0);
+        final double boxSize = max(baseSize, 30.0);
+        final double spacing = min(6.0, boxSize / 8);
+        final double effectiveBoxWidth = boxSize * 0.8;
         
         // Add margin around the content area
-        final contentWidth = maxWidth - 20.0; // Slightly larger margins for better appearance
+        final contentWidth = maxWidth - 20.0;
         
         // Organize ciphered characters into words
         List<List<String>> words = [];
@@ -690,7 +777,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
           }
           
           // Calculate word width with safety margin
-          double wordWidth = word.length * effectiveBoxWidth * 1.05; // Smaller safety margin
+          double wordWidth = word.length * effectiveBoxWidth * 1.05;
           
           // Check if adding this word would exceed the content width
           if (currentLineWidth + wordWidth > contentWidth && currentLine.isNotEmpty) {
@@ -713,7 +800,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
         // Build the layout with center alignment
         return SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0), // Slightly larger side margins
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
               children: lines.asMap().entries.map((lineEntry) {
                 int lineIndex = lineEntry.key;
@@ -731,15 +818,15 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: spacing),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Center alignment
-                    mainAxisSize: MainAxisSize.min, // Take only needed space
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: line.asMap().entries.map((wordEntry) {
                       int wordIndex = wordEntry.key;
                       List<String> word = wordEntry.value;
                       
                       // Create a row for this word
                       return Row(
-                        mainAxisSize: MainAxisSize.min, // Take only needed space
+                        mainAxisSize: MainAxisSize.min,
                         children: word.asMap().entries.map((charEntry) {
                           int charIndex = charEntry.key;
                           String char = charEntry.value;
@@ -810,7 +897,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
     }
 
     return SizedBox(
-      width: size * 0.8, // Wider container (was 0.7)
+      width: size * 0.8,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -831,8 +918,8 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
               );
             } : null,
             child: Container(
-              height: size * 0.4, // Larger height (was 0.35)
-              width: size * 0.4,  // Larger width (was 0.35)
+              height: size * 0.4,
+              width: size * 0.4,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: controller?.text.isNotEmpty == true 
@@ -850,7 +937,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
               child: Text(
                 controller?.text.toUpperCase() ?? '',
                 style: TextStyle(
-                  fontSize: size * 0.3, // Larger text (was 0.25)
+                  fontSize: size * 0.3,
                   fontWeight: FontWeight.normal,
                   color: Theme.of(context).primaryColor,
                 ),
@@ -866,26 +953,26 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
                 if (snapshot.data ?? false) {
                   return ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: size * 0.9,  // Larger constraint (was 0.7)
-                      maxHeight: size * 0.9,  // Larger constraint (was 0.7)
+                      maxWidth: size * 0.9,
+                      maxHeight: size * 0.9,
                     ),
                     child: Image.asset(
                       'assets/$selectedEncoding/${char.toLowerCase()}/${char.toUpperCase()}.png',
-                      width: size * 0.9,  // Larger image (was 0.7)
-                      height: size * 0.9,  // Larger image (was 0.7)
+                      width: size * 0.9,
+                      height: size * 0.9,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, _) => const SizedBox.shrink(),
                     ),
                   );
                 }
                 return SizedBox(
-                  height: size * 0.75, // Larger size (was 0.6)
-                  width: size * 0.75,  // Larger size (was 0.6)
+                  height: size * 0.75,
+                  width: size * 0.75,
                   child: Center(
                     child: Text(
                       char.toUpperCase(),
                       style: TextStyle(
-                        fontSize: size * 0.5,  // Larger text (was 0.4)
+                        fontSize: size * 0.5,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -896,13 +983,13 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
           else
             // For standard substitution cipher, show the cipher character
             SizedBox(
-              height: size * 0.75, // Larger height (was 0.6)
-              width: size * 0.75,  // Larger width (was 0.6)
+              height: size * 0.75,
+              width: size * 0.75,
               child: Center(
                 child: Text(
                   char.toUpperCase(),
                   style: TextStyle(
-                    fontSize: size * 0.5,  // Larger text (was 0.4)
+                    fontSize: size * 0.5,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -912,5 +999,4 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
       ),
     );
   }
-
 }
