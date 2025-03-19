@@ -731,7 +731,7 @@ class CipherSolverPageState extends State<CipherSolverPage> with CipherSolverSta
         final maxWidth = constraints.maxWidth;
         // Increase base size while maintaining overflow prevention
         final double baseSize = min(maxWidth / 18, 75.0);
-        final double boxSize = max(baseSize, 30.0);
+        final double boxSize = max(baseSize, 40.0);
         final double spacing = min(6.0, boxSize / 8);
         final double effectiveBoxWidth = boxSize * 0.8;
         
